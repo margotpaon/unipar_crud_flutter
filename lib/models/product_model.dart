@@ -1,5 +1,3 @@
-import 'dart:html';
-
 class ProductModel implements Comparable {
   int? id = 0;
   String? name = "";
@@ -21,10 +19,10 @@ class ProductModel implements Comparable {
     return {
       'id': id,
       'name': name,
-      'phone': tamanho,
-      'email': cor,
-      'image': preco,
-      'addressLine1': quantidade,
+      'tamanho': tamanho,
+      'cor': cor,
+      'preco': preco,
+      'quantidade': quantidade,
     };
   }
 
