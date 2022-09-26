@@ -105,6 +105,63 @@ class ProductDB {
     return true;
   }
 
+  Future<bool> update(ProductModel productModel) async {
+    final db = _db;
+    if (db == null) {
+      return false;
+    }
+    try {
+      final updateCount = await db.update(
+        'Product',
+        {
+          'NAME': productModel.name,
+          'TAMANHO': productModel.tamanho,
+          'COR': productModel.cor,
+          'PRECO': productModel.preco,
+          'QUANTIDADE': productModel.quantidade
+        },
+        where: 'ID=?',
+        whereArgs: [productModel.id],
+      );
+      if (updateCount == 1) {
+        _products.removeWhere((other) => other.id == productModel.id);
+        _products.add(productModel);
+        _streamController.add(_products);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Failed to update product $e');
+      return false;
+    }
+  }
+
+  Future<bool> delete(ProductModel productModel) async {
+    final db = _db;
+    if (db == null) {
+      return false;
+    }
+    try {
+      final deletedCount = await db.delete(
+        'Product',
+        where: 'ID=?',
+        whereArgs: [productModel.id],
+      );
+
+      if (deletedCount == 1) {
+        _products.remove(productModel);
+        _streamController.add(_products);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Deletion failed with error $e');
+      return false;
+    }
+  }
+
   Stream<List<ProductModel>> all() =>
       _streamController.stream.map((products) => products..sort());
 }
