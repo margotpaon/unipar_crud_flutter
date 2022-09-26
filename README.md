@@ -39,3 +39,6 @@ será redirecionado para tela de detalhes de produtos onde poderá
 alterar o produto. Permitir a exclusão do produto apenas na tela de
 lista.
 
+## Dependências
+- sqflite: ^2.1.0
+- path_provider: ^2.0.11
