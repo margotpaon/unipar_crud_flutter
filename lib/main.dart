@@ -60,21 +60,32 @@ class _HomePageState extends State<HomePage> {
                         final getProducts = products[index];
                         return ListTile(
                           onTap: () async {
-                            // final editProduct = await showUpdateDialog(
-                            //   context,
-                            //   productModel,
-                            // );
-                            // if (editProduct != null) {
-                            //   await _crudStorage.update(editProduct);
-                            // }
+                            final editProduct = await showUpdateDialog(
+                              context,
+                              getProducts,
+                            );
+                            if (editProduct != null) {
+                              await _crudStorage.update(editProduct);
+                            }
                           },
                           title: Text(getProducts.name!),
                           subtitle: Row(
                             children: <Widget>[
-                              Text('Tamanho: ${getProducts.tamanho!}'),
-                              Text(' Cor: ${getProducts.cor!}'),
-                              Text(' Preco: ${getProducts.preco!}'),
-                              Text(' Quantidade: ${getProducts.quantidade!} '),
+                              Flexible(
+                                child: Wrap(
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  alignment: WrapAlignment.spaceBetween,
+                                  spacing: 30,
+                                  direction: Axis.horizontal,
+                                  children: [
+                                    Text('Tamanho: ${getProducts.tamanho!}'),
+                                    Text(' Cor: ${getProducts.cor!}'),
+                                    Text(' Preco: ${getProducts.preco!}'),
+                                    Text(
+                                        ' Quantidade: ${getProducts.quantidade!} '),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                           trailing: TextButton(
