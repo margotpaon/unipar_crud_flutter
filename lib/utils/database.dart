@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:unipar_crud_flutter/models/product_model.dart';
@@ -11,23 +10,7 @@ class ProductDB {
   List<ProductModel> _products = [];
   final _streamController = StreamController<List<ProductModel>>.broadcast();
 
-  // Get all data on database
-  Future<List<ProductModel>> _fetchProducts() async {
-    final db = _db;
-    if (db == null) return [];
-    try {
-      final read = await db.query('Product',
-          distinct: true,
-          columns: ['ID', 'NAME', 'TAMANHO', 'COR', 'PRECO', 'QUANTIDADE'],
-          orderBy: 'ID');
-      final getProducts = read.map((row) => ProductModel.fromRow(row)).toList();
-      return getProducts;
-    } catch (e) {
-      print('Error fetching people =$e');
-      return [];
-    }
-  }
-
+  // C in CRUD
   Future<bool> create(String name, String tamanho, String cor, String preco,
       String quantidade) async {
     final db = _db;
@@ -54,6 +37,82 @@ class ProductDB {
       return true;
     } catch (e) {
       print('Error in creating product =$e');
+      return false;
+    }
+  }
+
+  // R in CRUD
+  Future<List<ProductModel>> _fetchProducts() async {
+    final db = _db;
+    if (db == null) return [];
+    try {
+      final read = await db.query('Product',
+          distinct: true,
+          columns: ['ID', 'NAME', 'TAMANHO', 'COR', 'PRECO', 'QUANTIDADE'],
+          orderBy: 'ID');
+      final getProducts = read.map((row) => ProductModel.fromRow(row)).toList();
+      return getProducts;
+    } catch (e) {
+      print('Error fetching people =$e');
+      return [];
+    }
+  }
+
+  // U in CRUD
+  Future<bool> update(ProductModel productModel) async {
+    final db = _db;
+    if (db == null) {
+      return false;
+    }
+    try {
+      final updateCount = await db.update(
+        'Product',
+        {
+          'NAME': productModel.name,
+          'TAMANHO': productModel.tamanho,
+          'COR': productModel.cor,
+          'PRECO': productModel.preco,
+          'QUANTIDADE': productModel.quantidade
+        },
+        where: 'ID=?',
+        whereArgs: [productModel.id],
+      );
+      if (updateCount == 1) {
+        _products.removeWhere((other) => other.id == productModel.id);
+        _products.add(productModel);
+        _streamController.add(_products);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Failed to update product $e');
+      return false;
+    }
+  }
+
+  // D in CRUD
+  Future<bool> delete(ProductModel productModel) async {
+    final db = _db;
+    if (db == null) {
+      return false;
+    }
+    try {
+      final deletedCount = await db.delete(
+        'Product',
+        where: 'ID=?',
+        whereArgs: [productModel.id],
+      );
+
+      if (deletedCount == 1) {
+        _products.remove(productModel);
+        _streamController.add(_products);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Deletion failed with error $e');
       return false;
     }
   }
@@ -103,63 +162,6 @@ class ProductDB {
     }
     await db.close();
     return true;
-  }
-
-  Future<bool> update(ProductModel productModel) async {
-    final db = _db;
-    if (db == null) {
-      return false;
-    }
-    try {
-      final updateCount = await db.update(
-        'Product',
-        {
-          'NAME': productModel.name,
-          'TAMANHO': productModel.tamanho,
-          'COR': productModel.cor,
-          'PRECO': productModel.preco,
-          'QUANTIDADE': productModel.quantidade
-        },
-        where: 'ID=?',
-        whereArgs: [productModel.id],
-      );
-      if (updateCount == 1) {
-        _products.removeWhere((other) => other.id == productModel.id);
-        _products.add(productModel);
-        _streamController.add(_products);
-        return true;
-      } else {
-        return false;
-      }
-    } catch (e) {
-      print('Failed to update product $e');
-      return false;
-    }
-  }
-
-  Future<bool> delete(ProductModel productModel) async {
-    final db = _db;
-    if (db == null) {
-      return false;
-    }
-    try {
-      final deletedCount = await db.delete(
-        'Product',
-        where: 'ID=?',
-        whereArgs: [productModel.id],
-      );
-
-      if (deletedCount == 1) {
-        _products.remove(productModel);
-        _streamController.add(_products);
-        return true;
-      } else {
-        return false;
-      }
-    } catch (e) {
-      print('Deletion failed with error $e');
-      return false;
-    }
   }
 
   Stream<List<ProductModel>> all() =>
